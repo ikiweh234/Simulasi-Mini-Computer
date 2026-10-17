@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulator Mini Computer - Organisasi & Arsitektur Komputer</title>
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-hover: #4338ca;
+            --success: #10b981;
+            --success-hover: #059669;
+            --warning: #f59e0b;
+            --dark: #1e1b4b;
+            --light: #f8fafc;
+            --gray-border: #cbd5e1;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f0f4ff 0%, #fdf2f8 100%);
+            color: #1e293b;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .header-container {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .header-container h2 {
+            color: var(--dark);
+            margin-bottom: 5px;
+            font-size: 1.8rem;
+        }
+
+        .header-container p {
+            color: #64748b;
+            font-size: 0.95rem;
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.08);
+            padding: 22px;
+            display: flex;
+            flex-direction: column;
+            border-top: 5px solid var(--primary);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 30px -5px rgba(0, 0, 0, 0.12);
+        }
+
+        .card:nth-child(2) { border-top-color: #8b5cf6; }
+        .card:nth-child(3) { border-top-color: #06b6d4; }
+
+        .card h3 {
+            margin-top: 0;
+            color: var(--dark);
+            font-size: 1.15rem;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            font-size: 0.85rem;
+            color: #475569;
+            margin-bottom: 6px;
+        }
+
+        input[type="number"] {
+            width: 100%;
+            padding: 11px;
+            border: 2px solid var(--gray-border);
+            border-radius: 8px;
+            font-size: 1rem;
+            box-sizing: border-box;
+            transition: all 0.2s;
+            background-color: #f8fafc;
+        }
+
+        input[type="number"]:focus {
+            outline: none;
+            border-color: var(--primary);
+            background-color: white;
+            box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.15);
+        }
+
+        .btn-container {
+            display: flex;
+            gap: 12px;
+            margin-top: 10px;
+        }
+
+        /* Efek Tombol Interaktif */
+        button {
+            flex: 1;
+            padding: 12px 18px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 700;
+            cursor: pointer;
+            font-size: 0.95rem;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px -2px rgba(0, 0, 0, 0.15);
+        }
+
+        button:active {
+            transform: translateY(1px) scale(0.98);
+            box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-reset {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+        }
+        .btn-reset:hover { background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%); }
+
+        .btn-step {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+        }
+        .btn-step:hover { background: linear-gradient(135deg, #059669 0%, #047857 100%); }
+
+        .log-box {
+            margin-top: 18px;
+            padding: 14px;
+            background: #eef2ff;
+            border-left: 5px solid var(--primary);
+            border-radius: 8px;
+            font-size: 0.9rem;
+            color: #312e81;
+            min-height: 55px;
+            display: flex;
+            align-items: center;
+            font-weight: 500;
+        }
+
+        /* CPU Register styling dengan warna aksen */
+        .cpu-badge-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 15px;
+        }
+
+        .badge-box {
+            background: linear-gradient(135deg, #f3e8ff 0%, #fae8ff 100%);
+            padding: 12px;
+            border-radius: 10px;
+            text-align: center;
+            border: 1px solid #e9d5ff;
+        }
+
+        .badge-box span {
+            display: block;
+            font-size: 0.75rem;
+            color: #7e22ce;
+            text-transform: uppercase;
+            font-weight: 700;
+        }
+
+        .badge-box strong {
+            font-size: 1.2rem;
+            color: #581c87;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+            margin-top: 5px;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        th, td {
+            border: 1px solid #e2e8f0;
+            padding: 10px 12px;
+            text-align: center;
+        }
+
+        th {
+            background-color: #334155;
+            color: white;
+            font-weight: 600;
+        }
+
+        .active-row {
+            background-color: #fef08a !important;
+            font-weight: bold;
+            color: #854d0e;
+            transform: scale(1.01);
+            transition: all 0.2s ease;
+            box-shadow: inset 0 0 0 2px #facc15;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header-container">
+        <h2>Simulasi Mini Computer: Perhitungan Denda Keterlambatan</h2>
+        <p>Praktikum Organisasi dan Arsitektur Komputer berbasis Web Virtual Machine</p>
+    </div>
+    
+    <div class="dashboard">
+        <!-- Panel 1: Kontrol & Input -->
+        <div class="card">
+            <h3>⚙️ Panel Kontrol & Input</h3>
+            <div class="form-group">
+                <label for="inputHari">Jumlah Hari Terlambat:</label>
+                <input type="number" id="inputHari" value="5" min="0">
+            </div>
+            
+            <div class="form-group">
+                <label for="inputTarif">Tarif Denda per Hari (Rp):</label>
+                <input type="number" id="inputTarif" value="20000" min="0">
+            </div>
+            
+            <div class="btn-container">
+                <button class="btn-reset" onclick="mulaiSimulasi()">🔄 Reset</button>
+                <button class="btn-step" onclick="langkahEksekusi()">▶ Step (Langkah)</button>
+            </div>
+            
+            <div class="log-box" id="statusLog">
+                Status: Sistem siap dijalankan. Klik tombol "Step".
+            </div>
+        </div>
+
+        <!-- Panel 2: CPU & Registers -->
+        <div class="card">
+            <h3>💻 CPU & Registers</h3>
+            
+            <div class="cpu-badge-container">
+                <div class="badge-box">
+                    <span>Program Counter (PC)</span>
+                    <strong id="regPC">0</strong>
+                </div>
+                <div class="badge-box">
+                    <span>Instruction Register (IR)</span>
+                    <strong id="regIR" style="font-size: 0.9rem;">-</strong>
+                </div>
+            </div>
+
+            <table>
+                <thead>
+                    <tr><th>Register</th><th>Isi Data (Value)</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td><strong>R1</strong> (Hari)</td><td id="regR1">0</td></tr>
+                    <tr><td><strong>R2</strong> (Tarif)</td><td id="regR2">0</td></tr>
+                    <tr><td><strong>R3</strong> (Total)</td><td id="regR3" style="font-weight: bold; color: var(--primary);">0</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Panel 3: Memori Utama (RAM) -->
+        <div class="card">
+            <h3>🗄️ Memori Utama (RAM)</h3>
+            <table>
+                <thead>
+                    <tr><th>Alamat</th><th>Instruksi / Data Program</th></tr>
+                </thead>
+                <tbody>
+                    <tr id="ram-0"><td>0</td><td>INPUT R1</td></tr>
+                    <tr id="ram-1"><td>1</td><td>INPUT R2</td></tr>
+                    <tr id="ram-2"><td>2</td><td>MUL R3, R1, R2</td></tr>
+                    <tr id="ram-3"><td>3</td><td>STORE R3, 100</td></tr>
+                    <tr id="ram-4"><td>4</td><td>OUTPUT R3</td></tr>
+                    <tr id="ram-5"><td>5</td><td>HALT</td></tr>
+                    <tr id="ram-100"><td><strong>100</strong></td><td id="mem100" style="font-weight: bold; color: #059669;">0</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+<script>
+    let pc = 0;
+    let r1 = 0, r2 = 0, r3 = 0;
+    let mem100 = 0;
+    
+    const program = [
+        "INPUT R1",
+        "INPUT R2",
+        "MUL R3, R1, R2",
+        "STORE R3, 100",
+        "OUTPUT R3",
+        "HALT"
+    ];
+
+    function bersihkanHighlightRAM() {
+        for (let i = 0; i <= 5; i++) {
+            let row = document.getElementById(`ram-${i}`);
+            if (row) row.classList.remove("active-row");
+        }
+    }
+
+    function mulaiSimulasi() {
+        pc = 0;
+        r1 = 0; r2 = 0; r3 = 0; mem100 = 0;
+        bersihkanHighlightRAM();
+        
+        document.getElementById("regPC").innerText = pc;
+        document.getElementById("regIR").innerText = "-";
+        document.getElementById("regR1").innerText = "0";
+        document.getElementById("regR2").innerText = "0";
+        document.getElementById("regR3").innerText = "0";
+        document.getElementById("mem100").innerText = "0";
+        document.getElementById("statusLog").innerText = "Status: Program di-reset, siap dieksekusi per langkah.";
+    }
+
+    function langkahEksekusi() {
+        if (pc >= program.length) {
+            document.getElementById("statusLog").innerText = "Status: Program telah berhenti (HALT). Silakan klik Reset untuk mengulang.";
+            return;
+        }
+
+        bersihkanHighlightRAM();
+
+        let instruksiSaatIni = program[pc];
+        document.getElementById("regIR").innerText = instruksiSaatIni;
+        
+        let activeRow = document.getElementById(`ram-${pc}`);
+        if (activeRow) activeRow.classList.add("active-row");
+
+        switch(pc) {
+            case 0:
+                r1 = parseInt(document.getElementById("inputHari").value) || 0;
+                document.getElementById("regR1").innerText = r1;
+                document.getElementById("statusLog").innerText = `[Fetch & Execute] Membaca hari keterlambatan (${r1}) ke dalam Register R1.`;
+                break;
+            case 1:
+                r2 = parseInt(document.getElementById("inputTarif").value) || 0;
+                document.getElementById("regR2").innerText = r2.toLocaleString('id-ID');
+                document.getElementById("statusLog").innerText = `[Fetch & Execute] Membaca tarif denda (Rp${r2.toLocaleString('id-ID')}) ke dalam Register R2.`;
+                break;
+            case 2:
+                r3 = r1 * r2;
+                document.getElementById("regR3").innerText = r3.toLocaleString('id-ID');
+                document.getElementById("statusLog").innerText = `[ALU Active] Mengalikan R1 (${r1}) × R2 (${r2.toLocaleString('id-ID')}) = Rp${r3.toLocaleString('id-ID')}.`;
+                break;
+            case 3:
+                mem100 = r3;
+                document.getElementById("mem100").innerText = "Rp" + mem100.toLocaleString('id-ID');
+                document.getElementById("statusLog").innerText = `[Memory Write] Menyimpan hasil R3 ke Memori RAM Alamat [100].`;
+                break;
+            case 4:
+                document.getElementById("statusLog").innerText = `[I/O Output] Menampilkan hasil akhir: Total denda adalah Rp${r3.toLocaleString('id-ID')}.`;
+                break;
+            case 5:
+                document.getElementById("statusLog").innerText = `[HALT] Eksekusi program selesai dengan sukses.`;
+                break;
+        }
+
+        pc++;
+        document.getElementById("regPC").innerText = pc < program.length ? pc : "HALT (Selesai)";
+    }
+</script>
+
+</body>
+</html>
